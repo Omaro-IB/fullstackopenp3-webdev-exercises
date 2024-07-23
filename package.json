@@ -4,8 +4,16 @@
   "description": "Exercises for full stack course at the University of Helsinki (fullstackopen.com) The exercises here are just for part 3, the rest of the exercises can be found here: [fullstackopen-webdev-exercises](https://github.com/Omaro-IB/fullstackopen-webdev-exercises)",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
