@@ -1,5 +1,5 @@
 ### DELETE request to api/persons/
-DELETE http://localhost:3001/api/persons/1
+DELETE http://localhost:3001/api/persons/673
 
 
 ###

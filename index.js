@@ -1,6 +1,6 @@
 const express = require('express')
+const  morgan = require('morgan')
 const app = express()
-app.use(express.json())
 // Persons list - statically defined
 let persons = [
     {
@@ -24,6 +24,23 @@ let persons = [
         "number": "39-23-6423122"
     }
 ]
+
+// JSON middleware
+app.use(express.json())
+
+// Morgan middleware for logging - request body logged for POST *only*
+morgan.token('body', (req, _) => JSON.stringify(req.body))
+const morganLogPostBodyMiddleware = (req, res, next) => {
+    let morganMiddleware
+    if (req.method === "POST") {  // only execute if request method is POST
+        morganMiddleware = morgan(':method :url :status :res[content-length] - :response-time ms :body')
+    } else {
+        morganMiddleware = morgan('tiny')
+    }
+    morganMiddleware(req, res, next)
+
+}
+app.use(morganLogPostBodyMiddleware)
 
 // Get /info
 app.get('/info', (req, res) => {
@@ -78,6 +95,10 @@ app.post('/api/persons', (req, res) => {
         res.status(200).json(person)
     }
 })
+
+// 404 middleware
+const unknownEndpointMiddleware = (request, response) => {response.status(404).send({ error: 'unknown endpoint' })}
+app.use(unknownEndpointMiddleware)
 
 const PORT = 3001
 app.listen(PORT, () => {
