@@ -100,7 +100,7 @@ app.post('/api/persons', (req, res) => {
 const unknownEndpointMiddleware = (request, response) => {response.status(404).send({ error: 'unknown endpoint' })}
 app.use(unknownEndpointMiddleware)
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
     console.log(`http://127.0.0.1:${PORT}`)
