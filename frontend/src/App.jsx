@@ -80,15 +80,13 @@ const App = () => {
     const handleAdd = (e) => {
         e.preventDefault()  // prevent page reload
         let personExists = -1  // -1 if doesn't exist, else ID of the duplicate person
-        let largestID = -1
 
         persons.forEach(p => {
             if (p.name === newName) {personExists = p.id}
-            if (parseInt(p.id) > largestID) {largestID = parseInt(p.id)}
         });  // check for already-existing person & for largest ID
 
         if (personExists === -1) {  // add person if does not already exist
-            const newPerson = {name: newName, number: newNumber, id: (largestID+1).toString()}
+            const newPerson = {name: newName, number: newNumber}
             phoneService.createPerson(newPerson).then(data => {
                 setPersons(persons.concat(data))
                 displayMessage(`Added ${newName}`, "notification")
@@ -97,13 +95,13 @@ const App = () => {
             })
         } else {  // if exists, update upon user confirmation
             if (window.confirm(`"${newName}" is already added to the phonebook, replace the old number with the new one?`)) {
-                const newPerson = {name: newName, number: newNumber, id: personExists}
+                const newPerson = {name: newName, number: newNumber}
                 phoneService.updatePerson(personExists, newPerson).then(data => {
                     setPersons(persons.map(p => {if (p.id === data.id) {return data} else {return p}}))
                     displayMessage(`Updated ${newName}`, "notification")
                 }).catch(_ => {
                     setPersons(persons.filter(p => p.id !== personExists))
-                    displayMessage(`${newName} already deleted from server`, "error")
+                    displayMessage(`Error updating ${newName}`, "error")
                 })
             }
         }

@@ -1,16 +1,27 @@
-### DELETE request to api/persons/
-DELETE http://localhost:3001/api/persons/673
+### DELETE request to api/persons/id
+DELETE https://fsop3.omaribrah.im:4441/api/persons/66baa3ffcf66ceebc0b33171
 
 
 ###
 
 ### POST request to api/persons
-POST http://localhost:3001/api/persons/
+POST https://fsop3.omaribrah.im:4441/api/persons
 Content-Type: application/json
 
 {
-  "name": "Omar",
+  "name": "test",
   "number": "123456789"
+}
+
+###
+
+### POST request to api/persons/id
+PUT https://fsop3.omaribrah.im:4441/api/persons/66bb505c263aefd9e5904f3d
+Content-Type: application/json
+
+{
+  "name": "test",
+  "number": "0123456789"
 }
 
 ###

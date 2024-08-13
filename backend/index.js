@@ -17,7 +17,7 @@ const credentials = {key: privateKey, cert: certificate};
 const app = express();
 
 
-// START: Middleware
+// START: Global Middleware
 // JSON middleware
 app.use(express.json())
 // CORS middleware
@@ -36,47 +36,51 @@ const morganLogPostBodyMiddleware = (req, res, next) => {
 
 }
 app.use(morganLogPostBodyMiddleware)
-// END: Middleware
+// END: Global Middleware
 
 
 // START: Endpoints
 // Get /info
-app.get('/info', (req, res) => {
+app.get('/info', (req, res, next) => {
     Person.find({}).then(persons => {
         res.status(200).send('<div>' +
             `<p>Phonebook has info for ${persons.length} people</p>` +
             `<p>${Date().toString()}</p>` +
             '</div>')
-    }).catch(_ => res.status(400).send("Error handling your request"))
+    }).catch(err => next(err))
 })
 
 // Get /api/persons
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({}).then(persons => {
         res.status(200).json(persons)
-    }).catch(_ => res.status(400).send("Error handling your request"))
+    }).catch(err => next(err))
 })
 
 // Get /api/persons/1
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     Person.findById(req.params.id).then(person => {
-        res.json(person)
-    }).catch(_ => res.status(400).send("Error handling your request"))
+        if (person) {
+            res.json(person)
+        } else {
+            res.status(404).send({ error: 'person not found' })
+        }
+    }).catch(err => next(err))
 })
 
-// Delete /api/persons/1  TODO
-// app.delete('/api/persons/:id', (req, res) => {
-//     let person = persons.find(p => p.id === req.params.id)
-//     if (!person) {
-//         res.status(404).send('No such person with id ' + req.params.id)
-//     } else {
-//         persons = persons.filter(p => p.id !== req.params.id)
-//         res.status(200).json(person)
-//     }
-// })
+// Delete /api/persons/1
+app.delete('/api/persons/:id', (req, res, next) => {
+    Person.findByIdAndDelete(req.params.id).then(person => {
+        if (person) {
+            res.json(person)
+        } else {
+            res.status(404).send({ error: 'person not found' })
+        }
+    }).catch(err => next(err))
+})
 
 // Post /api/persons
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     if (!req.body.name) {
         res.status(400).send('No name specified.')
     } else if (!req.body.number) {
@@ -88,8 +92,22 @@ app.post('/api/persons', (req, res) => {
         })
         person.save().then(savedPerson => {
             res.json(savedPerson)
-        }).catch(_ => res.status(400).send("Error handling your request"))
+        }).catch(err => next(err))
     }
+})
+
+// Put /api/persons/1
+app.put('/api/persons/:id', (req, res, next) => {
+    const person = {
+        name: req.body.content,
+        number: req.body.number,
+    }
+
+    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+        .then(updatedPerson => {
+            res.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 // End: Endpoints
 
@@ -97,6 +115,18 @@ app.post('/api/persons', (req, res) => {
 // 404 middleware
 const unknownEndpointMiddleware = (request, response) => {response.status(404).send({ error: 'unknown endpoint' })}
 app.use(unknownEndpointMiddleware)
+
+// Error handler middleware
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformed id' })
+    }
+
+    next(error)
+}
+app.use(errorHandler)
 
 // HTTPS server
 const httpsServer = https.createServer(credentials, app);
