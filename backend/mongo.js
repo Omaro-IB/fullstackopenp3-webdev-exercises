@@ -3,7 +3,7 @@ mongoose.set("strictQuery", false);
 
 // Define the database URL to connect to.
 // NOTE: I could not get a MongoDB atlas account working, so I have a MongoDB server running on the same cloud machine as my express server
-const mongoDB = `mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.15`
+const mongoDB = process.env.MONGODB_URI
 
 // Wait for database to connect, logging an error if there is a problem
 const promise = mongoose.connect(mongoDB)

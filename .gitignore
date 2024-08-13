@@ -1,4 +1,5 @@
 # Other
+.env
 deploy_backend.sh
 sslcert
 dist
