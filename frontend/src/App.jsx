@@ -90,8 +90,13 @@ const App = () => {
             phoneService.createPerson(newPerson).then(data => {
                 setPersons(persons.concat(data))
                 displayMessage(`Added ${newName}`, "notification")
-            }).catch(_ => {
-                displayMessage("Error creating person", "error")
+            }).catch(err => {
+                console.log(err)
+                if (err.response.status === 400) {
+                    displayMessage(`Validation error creating person: ${err.response.data.error}`, "error")
+                } else {
+                    displayMessage("Error creating person", "error")
+                }
             })
         } else {  // if exists, update upon user confirmation
             if (window.confirm(`"${newName}" is already added to the phonebook, replace the old number with the new one?`)) {
@@ -99,9 +104,12 @@ const App = () => {
                 phoneService.updatePerson(personExists, newPerson).then(data => {
                     setPersons(persons.map(p => {if (p.id === data.id) {return data} else {return p}}))
                     displayMessage(`Updated ${newName}`, "notification")
-                }).catch(_ => {
-                    setPersons(persons.filter(p => p.id !== personExists))
-                    displayMessage(`Error updating ${newName}`, "error")
+                }).catch(err => {
+                    if (err.response.status === 400) {
+                        displayMessage(`Validation error updating person: ${err.response.data.error}`, "error")
+                    } else {
+                        displayMessage(`Error updating ${newName}`, "error")
+                    }
                 })
             }
         }

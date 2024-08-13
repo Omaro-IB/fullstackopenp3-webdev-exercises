@@ -81,19 +81,13 @@ app.delete('/api/persons/:id', (req, res, next) => {
 
 // Post /api/persons
 app.post('/api/persons', (req, res, next) => {
-    if (!req.body.name) {
-        res.status(400).send('No name specified.')
-    } else if (!req.body.number) {
-        res.status(400).send('No number specified.')
-    } else {
-        const person = new Person({
-            name: req.body.name,
-            number: req.body.number,
-        })
-        person.save().then(savedPerson => {
-            res.json(savedPerson)
-        }).catch(err => next(err))
-    }
+    const person = new Person({
+        name: req.body.name,
+        number: req.body.number,
+    })
+    person.save().then(savedPerson => {
+        res.json(savedPerson)
+    }).catch(err => next(err))
 })
 
 // Put /api/persons/1
@@ -103,7 +97,7 @@ app.put('/api/persons/:id', (req, res, next) => {
         number: req.body.number,
     }
 
-    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    Person.findByIdAndUpdate(req.params.id, person, { new: true, runValidators: true, context: 'query' })
         .then(updatedPerson => {
             res.json(updatedPerson)
         })
@@ -122,6 +116,8 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformed id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
